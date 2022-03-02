@@ -1,0 +1,20 @@
+{
+    "name": "After School Club",
+    "short_name": "club",
+    "description": "online school club",
+    "icons": [
+        {
+            "src": "images/512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "images/192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ],
+    "start_url": "index.html",
+    "display": "fullscreen",
+    "background_color": "white"
+}
