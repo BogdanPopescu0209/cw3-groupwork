@@ -1,0 +1,77 @@
+h1{
+    text-align: center;
+}
+img{
+    height: 80px;
+    width: 80px;
+    float: left;
+    margin-top: 50px;
+}
+ul{
+    float: left;
+}
+.output{
+    padding-right: 10px;
+    border-style: solid;
+    border-color: cornflowerblue;
+    border-radius: 10px;
+    padding: 5px;
+}
+p{
+    padding-left: 120px;
+}
+.prodTitle{
+    padding-left: 120px;
+}
+.add{
+    background-color: cornflowerblue;
+    color: white;
+    margin-left: 100px;
+    cursor: pointer;
+}
+.checkout{
+    margin-left: 250px;
+    background-color: blue;
+    color: white;
+}
+.sort{
+    background-color: cornflowerblue;
+    color: white;
+    margin-left: 50px;
+    margin-bottom: 20px;
+}
+.search{
+    margin-top: 10px;
+    margin-left: 165px;
+}
+.buttonUpdateOrder{
+    background-color: cornflowerblue;
+    color: white;
+    cursor: pointer;
+}
+.searchBtn{
+    background-color: cornflowerblue;
+    color: white;
+    cursor: pointer;
+}
+.order{
+    margin-left: 620px;
+    margin-top: 500px;
+    border: 15px solid cornflowerblue;
+    padding: 50px;
+}
+.postOrder{
+    background-color: cornflowerblue;
+    color: white;
+    cursor: pointer;
+}
+.home{
+    background-color: cornflowerblue;
+    color: white;
+    cursor: pointer;
+}
+
+.sort{
+    background-color: cornflowerblue;
+    color: white;
+}

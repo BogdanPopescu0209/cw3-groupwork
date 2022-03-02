@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Store</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+
+</head>
+
+<body>
+
+    <div id="app">
+
+        <div class="container-fluid">
+
+            <!--First row-->
+            <div class="container-fluid">
+
+                <div class="row">
+
+                    <div class="col-lg"></div>
+
+                    <div class="col-lg">
+
+                        <header>
+
+                            <h1 v-text="sitename"></h1>
+
+                            <button v-if='cart.length > 0' class="checkout" v-on:click='showCheckout'>
+
+                                {{cartItemCount}}
+                                <span class="fas fa-cart-plus"></span> Checkout
+
+                            </button>
+
+                            <input class="search" type="text" v-model="searchItem" placeholder="Search...">
+
+                            <button class="searchBtn">
+                                <span class="fas fa-search"></span>Search</button>
+
+                        </header>
+
+                    </div>
+
+                    <div class="col-lg"></div>
+
+                </div>
+
+            </div>
+
+            <br>
+
+            <!--Second row-->
+            <div class="container-fluid">
+
+                <div class="row">
+
+                    <main>
+
+                        <div v-if='showProduct'>
+
+                            <br>
+
+                            <div class="container-fluid">
+
+                                <div class="row">
+
+                                    <p>Sort by:</p>
+
+                                    <div class="form-check" style="margin-right: 5px;">
+                                        <input v-model="topic" class="form-check-input" type="checkbox">
+                                        <label class="form-check-label" for="flexCheckDefault"> Subject </label>
+                                    </div>
+
+                                    <div class="form-check" style="margin-right: 5px;">
+                                        <input v-model="location" class="form-check-input" type="checkbox">
+                                        <label class="form-check-label" for="flexCheckDefault"> Location </label>
+                                    </div>
+
+                                    <div class="form-check" style="margin-right: 5px;">
+                                        <input v-model="price" class="form-check-input" type="checkbox">
+                                        <label class="form-check-label" for="flexCheckDefault"> Price </label>
+                                    </div>
+
+                                    <div class="form-check" style="margin-right: 5px;">
+                                        <input v-model="space" class="form-check-input" type="checkbox">
+                                        <label class="form-check-label" for="flexCheckDefault"> Availability </label>
+                                    </div>
+
+                                    <button class="sort" v-on:click="sortLowToHigh()">
+                                        <span class="fas fa-sort-up"></span> Ascending
+                                    </button>
+
+                                    <button class="sort" v-on:click="sortHighToLow()">
+                                        <span class="fas fa-sort-down"></span> Descending
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                            <br>
+
+                            <ul v-for="product in products">
+                                <div class="output">
+                                    <img v-bind:src="product.image" alt="logo.png">
+                                    <p>Subject: {{product.topic}}</p>
+                                    <p>Location: {{product.location}}</p>
+                                    <p>Price: {{product.price}}</p>
+                                    <p>Number of spaces: {{product.space}}</p>
+                                    <button class="add" v-on:click='addToCart(product)' v-if='canAddToCart(product)'>Add
+                                        to cart</button>
+                                    <button class="add" disabled='disabled' v-else>Add to cart</button>
+                                </div>
+                            </ul>
+                        </div>
+
+                        <div v-else>
+                            <ul v-for="product in cart">
+                                <div class="output">
+                                    <img v-bind:src="product.image" alt="logo.png">
+                                    <p>Subject: {{product.title}}</p>
+                                    <p>Location: {{product.location}}</p>
+                                    <p>Price: {{product.price}}</p>
+                                    <p>Number of spaces: 1</p>
+                                    <button class="add" v-on:click='deleteFromCart(product)'>
+                                        <span class="fas fa-trash"></span> Delete
+                                    </button>
+                                </div>
+                            </ul>
+
+                            <br>
+
+                            <div class="order">
+
+                                <input type="text" v-model="name" placeholder="Name">
+                                <input type="text" v-model="phoneNumber" placeholder="Phone Number">
+
+                                <button class="postOrder"
+                                    v-if='!onlyLetters.test(name) && onlyNumbers.test(phoneNumber)'
+                                    v-on:click='postOrder'>Post Order</button>
+
+                                <br>
+
+                                <p>{{feedback}}</p>
+
+                            </div>
+
+                        </div>
+
+                    </main>
+
+                </div>
+
+            </div>
+
+            <br>
+
+            <!--Third row-->
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg"></div>
+                    <div class="col-lg"></div>
+                    <div class="col-lg"></div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        var vueapp = new Vue({
+            el: '#app',
+            data: {
+                sitename: 'After School Club',
+                products: [],
+                cart: [],
+                showProduct: true,
+                cartTotalProducts: 0,
+                name: '',
+                phoneNumber: '',
+                space: '',
+                searchItem: '',
+                feedback: '',
+                onlyLetters: /\d/,
+                onlyNumbers: /^[0-9]+$/,
+                topic: false,
+                location: false,
+                price: false,
+                space: false
+            },
+
+            created: function () {
+
+                fetch('https://lessons-online-store.herokuapp.com/collection/lessons').then(
+                    function (response) {
+                        response.json().then(
+                            function (json) {
+                                vueapp.products = json
+                            }
+                        )
+                    }
+                )
+            },
+
+            methods: {
+
+                addToCart: function (product) {
+
+                    this.cart.push({
+
+                        _id: product._id,
+                        topic: product.topic,
+                        location: product.location,
+                        price: product.price,
+                        quantity: product.space,
+                        image: product.image
+
+                    })
+
+                    for (let i = 0; i < this.products.length; i++) {
+
+                        if (product.topic === this.products[i].topic) {
+
+                            let newSpace = this.products[i].space - 1
+                            this.products[i].space = newSpace
+                        }
+                    }
+                },
+
+                deleteFromCart: function (product) {
+
+                    for (let i = 0; i < this.cart.length; i++) {
+
+                        if (this.cart[i].title === product.title) {
+
+                            this.cart.splice(i, 1);
+
+                            product.quantity++;
+
+                            if (this.cart.length === 0) {
+
+                                this.showProduct = true;
+                            }
+                            break;
+                        }
+                    }
+
+                    for (let i = 0; i < this.products.length; i++) {
+
+                        if (product.topic === this.products[i].topic) {
+
+                            let newSpace = this.products[i].space + 1
+                            this.products[i].space = newSpace
+                        }
+                    }
+                },
+
+                postOrder: function () {
+
+                    lessonId = [];
+
+                    for (let i = 0; i < this.cart.length; i++) {
+
+                        lessonId.push({
+                            id: this.cart[i]._id,
+                            space: 1
+                        }
+                        )
+                    }
+
+                    let newOrder = {
+                        name: this.name,
+                        phone_number: this.phoneNumber,
+                        lessons: lessonId
+                    }
+
+                    fetch('https://lessons-online-store.herokuapp.com/collection/orders', {
+
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(newOrder),
+                    })
+                        .then(response => response.json())
+
+                    this.feedback = 'Order posted successfully!'
+
+                    this.putLesson()
+                },
+
+                putLesson: function () {
+
+                    for (let i = 0; i < this.cart.length; i++) {
+
+                        fetch('https://lessons-online-store.herokuapp.com/collection/lessons/' + this.cart[i]._id, {
+
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                "space": this.cart[i].quantity - 1
+                            }),
+                        })
+                            .then(response => response.json())
+                    }
+                },
+
+                showCheckout() {
+
+                    this.showProduct = this.showProduct ? false : true;
+
+                },
+
+                cartCount(topic) {
+
+                    let count = 0;
+
+                    for (let i = 0; i < this.cart.length; i++) {
+
+                        if (this.cart[i].topic === topic) {
+
+                            count++
+                        }
+                    }
+                    return count;
+                },
+
+                canAddToCart: function (product) {
+
+                    return product.space > 0;
+
+                },
+
+                sortLowToHigh: function () {
+
+                    if (this.topic === true) {
+
+                        function compare(x, y) {
+
+                            if (x.topic > y.topic) return 1;
+
+                            if (x.topic < y.topic) return -1;
+
+                            return 0;
+                        }
+                        return this.products.sort(compare);
+                    }
+
+
+                    if (this.location === true) {
+
+                        function compare(x, y) {
+
+                            if (x.location > y.location) return 1;
+
+                            if (x.location < y.location) return -1;
+
+                            return 0;
+                        }
+                        return this.products.sort(compare);
+
+                    }
+
+                    if (this.price === true) {
+
+                        function compare(x, y) {
+
+                            if (x.price > y.price) return 1;
+
+                            if (x.price < y.price) return -1;
+
+                            return 0;
+                        }
+                        return this.products.sort(compare);
+
+                    }
+
+                    if (this.space === true) {
+
+                        function compare(x, y) {
+
+                            if (x.space > y.space) return 1;
+
+                            if (x.space < y.space) return -1;
+
+                            return 0;
+                        }
+                        return this.products.sort(compare);
+
+                    }
+
+                },
+
+                sortHighToLow: function () {
+
+                    if (this.topic === true) {
+
+                        function compare(x, y) {
+
+                            if (x.topic < y.topic) return 1;
+
+                            if (x.topic > y.topic) return -1;
+
+                            return 0;
+                        }
+                        return this.products.sort(compare);
+                    }
+
+
+                    if (this.location === true) {
+
+                        function compare(x, y) {
+
+                            if (x.location < y.location) return 1;
+
+                            if (x.location > y.location) return -1;
+
+                            return 0;
+                        }
+                        return this.products.sort(compare);
+
+                    }
+
+                    if (this.price === true) {
+
+                        function compare(x, y) {
+
+                            if (x.price < y.price) return 1;
+
+                            if (x.price > y.price) return -1;
+
+                            return 0;
+                        }
+                        return this.products.sort(compare);
+
+                    }
+
+                    if (this.space === true) {
+
+                        function compare(x, y) {
+
+                            if (x.space < y.space) return 1;
+
+                            if (x.space > y.space) return -1;
+
+                            return 0;
+                        }
+                        return this.products.sort(compare);
+
+                    }
+
+                }
+            },
+
+            computed: {
+
+                cartItemCount: function () {
+
+                    this.cartTotalProducts = this.cart.map(item => 1).reduce((prev, curr) => prev + curr, 0);
+
+                    return this.cartTotalProducts || '0';
+
+                }
+            },
+
+            watch: {
+
+                searchItem: async function () {
+
+                    if (this.searchItem.length > 0) {
+
+                        await fetch('https://lessons-online-store.herokuapp.com/search/lessons/' + this.searchItem).then(
+                            function (response) {
+                                response.json().then(
+                                    function (json) {
+                                        vueapp.products = json
+                                    }
+                                )
+                            }
+                        )
+
+                    } else {
+
+                        fetch('https://lessons-online-store.herokuapp.com/collection/lessons').then(
+                            function (response) {
+                                response.json().then(
+                                    function (json) {
+                                        vueapp.products = json
+                                    }
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+        })
+
+    </script>
+
+</body>
+
+</html>
