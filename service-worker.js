@@ -21,3 +21,22 @@ self.addEventListener('install', (event) => {
         })
     )
 });
+
+self.addEventListener('fetch', function (event) {
+
+    event.respondWith(
+
+        caches.match(event.request).then(function (r) {
+
+            return r || fetch(event.request).then(function (response) {
+
+                return caches.open(cacheName).then(function (cache) {
+
+                    cache.put(event.request, response.clone());
+
+                    return response;
+                })
+            })
+        })
+    )
+})
